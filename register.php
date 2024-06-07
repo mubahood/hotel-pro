@@ -1,8 +1,32 @@
 <?php
 require_once('functions.php');
+/* echo "<pre>";
+print_r($_SESSION);
+die(); */
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    die("time to register someone.");
+    $_SESSION['form_data'] = $_POST;
+
+    $email = $_POST['username'];
+    //validate email
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $_SESSION['form_errors']['username'] = 'Invalid email address.';
+        //redirect back
+        header('Location: register.php');
+        exit;
+    }
+    $password_1 = $_POST['password'];
+    $password_2 = $_POST['password_2'];
+
+    if ($password_1 != $password_2) {
+        $_SESSION['form_errors']['password'] = 'Passwords do not match.';
+        //redirect back
+        header('Location: register.php');
+        exit;
+    }
+    echo "<pre>";
+    print_r($_POST);
+    die();
 }
 
 
@@ -132,24 +156,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <p class="mb-4">Please sign-in to your account and start the adventure</p>
 
                     <form id="formAuthentication" class="mb-3" action="register.php" method="POST">
-                        <?php echo text_input([]) ?>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email or Username</label>
-                            <input type="text" class="form-control" id="email" name="email-username" placeholder="Enter your email or username" autofocus>
-                        </div>
 
-                        <div class="mb-3 form-password-toggle">
-                            <div class="d-flex justify-content-between">
-                                <label class="form-label" for="password">Password</label>
-                                <a href="auth-forgot-password-cover.html">
-                                    <small>Forgot Password?</small>
-                                </a>
-                            </div>
-                            <div class="input-group input-group-merge">
-                                <input type="password" id="password" class="form-control" name="password" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-describedby="password" />
-                                <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
-                            </div>
-                        </div>
+                        <?php echo text_input([
+                            'label' => 'Full Name',
+                            'name' => 'name',
+                            'attributes' => 'autofocus required '
+                        ]) ?>
+
+                        <?php echo text_input([
+                            'label' => 'Email',
+                            'name' => 'username',
+                            'type' => 'email',
+                            'attributes' => ' required '
+                        ]) ?>
+
+                        <?php echo text_input([
+                            'label' => 'Password',
+                            'name' => 'password',
+                            'type' => 'password',
+                            'attributes' => ' required '
+                        ]) ?>
+
+                        <?php echo text_input([
+                            'label' => 'Confirm Password',
+                            'name' => 'password_2',
+                            'type' => 'password',
+                            'attributes' => ' required '
+                        ]) ?>
+
+
+
                         <div class="mb-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="remember-me">
