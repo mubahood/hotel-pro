@@ -3,6 +3,56 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
+
+function db_select($table, $where = null, $fields = '*')
+{
+    $conn = db_connect();
+
+    $sql = "SELECT $fields FROM $table";
+    if ($where != null) {
+        $sql .= " WHERE $where";
+    }
+    $result = mysqli_query($conn, $sql);
+    $data = [];
+    if ($result) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $data[] = $row;
+        }
+    }
+    return $data;
+}
+
+
+function db_insert($table, $data)
+{
+    $conn = db_connect();
+    $fields = implode(',', array_keys($data));
+
+    //string escape
+    foreach ($data as $key => $value) {
+        $data[$key] = mysqli_real_escape_string($conn, $value);
+    }
+    $values = "'" . implode("','", array_values($data)) . "'";
+    $sql = "INSERT INTO $table ($fields) VALUES ($values)";
+    $result = mysqli_query($conn, $sql);
+    if ($result) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+function db_connect()
+{
+    $conn = mysqli_connect('localhost', 'root', 'root', 'hotel_pro');
+    if (!$conn) {
+        die('Database connection failed');
+    }
+    return $conn;
+}
+
+
+//text input
 function text_input($param)
 {
     $label = 'Field';

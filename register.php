@@ -7,6 +7,10 @@ die(); */
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $_SESSION['form_data'] = $_POST;
 
+    if (isset($_SESSION['form_errors'])) {
+        unset($_SESSION['form_errors']);
+    }
+
     $email = $_POST['username'];
     //validate email
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -24,9 +28,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         header('Location: register.php');
         exit;
     }
-    echo "<pre>";
-    print_r($_POST);
-    die();
+
+    //check if the email already exists
+    $data = db_select('users', " email = '$email' ");
+    if (!empty($data)) {
+        $_SESSION['form_errors']['username'] = 'A user with that email already exists.';
+        //redirect back
+        header('Location: register.php');
+        exit;
+    }
+
+    db_insert('users', [
+        'name' => $_POST['name'],
+        'email' => $_POST['username'],
+        'user_type' => 'Customer',
+        'password' => password_hash($_POST['password'], PASSWORD_DEFAULT)
+    ]);
+
+
+    $data = db_select('users', " email = '$email' ");
+    if (empty($data)) {
+        $_SESSION['form_errors']['username'] = 'An error occurred. Please try again.';
+        header('Location: register.php');
+        exit;
+    }
+    $user = $data[0];
+    $_SESSION['user'] = $user;
+
+    //check if user type is customer
+    if ($user['user_type'] == 'Customer') {
+        header('Location: customer.php');
+    } else {
+        header('Location: admin.php');
+    }
+    exit;
 }
 
 
