@@ -1,3 +1,52 @@
+<?php
+require_once('functions.php');
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $_SESSION['form_data'] = $_POST;
+
+    if (isset($_SESSION['form_errors'])) {
+        unset($_SESSION['form_errors']);
+    }
+
+    $email = $_POST['username'];
+
+    $password = $_POST['password'];
+
+    //check if user exists
+    $users = db_select('users', " email = '$email' ");
+    if (count($users) == 0) {
+        $_SESSION['form_errors']['username'] = 'User does not exist.';
+        //redirect back
+        header('Location: login.php');
+        exit;
+    }
+    $user = $users[0];
+    $password_hash = $user['password'];
+
+    if (!password_verify($password, $password_hash)) {
+        $_SESSION['form_errors']['password'] = 'Invalid password.';
+        //redirect back
+        header('Location: login.php');
+        exit;
+    }
+
+
+    //check if user type is customer
+    if ($user['user_type'] == 'Customer') {
+        header('Location: customer.php');
+    } else if ($user['user_type'] == 'Admin') {
+        header('Location: admin.php');
+    } else {
+        $_SESSION['form_errors']['username'] = 'User does not exist.';
+        //redirect back
+        header('Location: login.php');
+        exit;
+    }
+    exit;
+}
+
+
+?>
 <!DOCTYPE html>
 <html lang="en" class="light-style layout-wide  customizer-hide" dir="ltr" data-theme="theme-bordered" data-assets-path="assets/" data-template="vertical-menu-template-bordered">
 
@@ -119,26 +168,28 @@
                         </a>
                     </div>
                     <!-- /Logo -->
-                    <h4 class="mb-2">Welcome to Frest! 👋</h4>
-                    <p class="mb-4">Please sign-in to your account and start the adventure</p>
+                    <h4 class="mb-2">Login 👋</h4>
+                    <p class="mb-4">Please sign-in to your account.</p>
 
-                    <form id="formAuthentication" class="mb-3" action="index.html" method="GET">
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email or Username</label>
-                            <input type="text" class="form-control" id="email" name="email-username" placeholder="Enter your email or username" autofocus>
-                        </div>
-                        <div class="mb-3 form-password-toggle">
-                            <div class="d-flex justify-content-between">
-                                <label class="form-label" for="password">Password</label>
-                                <a href="auth-forgot-password-cover.html">
-                                    <small>Forgot Password?</small>
-                                </a>
-                            </div>
-                            <div class="input-group input-group-merge">
-                                <input type="password" id="password" class="form-control" name="password" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" aria-describedby="password" />
-                                <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
-                            </div>
-                        </div>
+                    <form id="formAuthentication" class="mb-3" action="login.php" method="POST">
+
+
+
+                        <?php echo text_input([
+                            'label' => 'Email',
+                            'name' => 'username',
+                            'type' => 'email',
+                            'attributes' => ' required '
+                        ]) ?>
+
+                        <?php echo text_input([
+                            'label' => 'Password',
+                            'name' => 'password',
+                            'type' => 'password',
+                            'attributes' => ' required '
+                        ]) ?>
+
+
                         <div class="mb-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="remember-me">
@@ -148,7 +199,7 @@
                             </div>
                         </div>
                         <button class="btn btn-primary d-grid w-100 bg-primary text-white">
-                            Sign in
+                            Login
                         </button>
                     </form>
 
@@ -215,4 +266,5 @@
 
 </html>
 
+<!-- beautify ignore:end -->
 <!-- beautify ignore:end -->
