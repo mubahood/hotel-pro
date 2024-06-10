@@ -1,7 +1,0 @@
-Mirror in progress since Tue, 04 Jun 2024 19:09:36 .. please wait!
-httrack -@i4 -O /storage/emulated/0/HTTrack/Websites/admin1 -A25000k%Px%q0u1s2%s%u%fDaK0H0N0p3 https://demos.pixinvent.com/frest-html-admin-template/html/vertical-menu-template/ +*.png +*.gif +*.jpg +*.css +*.js -ad.doubleclick.net/* -mime:application/foobar -F "Mozilla/4.5 (compatible; HTTrack 3.0x; Windows 98)" -%F "<!-- Mirrored from %s%s by HTTrack Website Copier/3.x [XR&CO'2017], %s -->" -%l LANGUAGE_ISO,* 
-To pause the engine: create an empty file named 'hts-stop.lock'
-PID=5436
-UID=10445
-GID=10445
-START=1717517376
