@@ -1,3 +1,33 @@
+<?php
+
+require_once('functions.php');
+
+$section_is_set = false;
+$page_is_set = false;
+$has_alert_message = false;
+$alert_message = '';
+$alert_type = '';
+
+if (isset($_SESSION['alert_message'])) {
+    if (isset($_SESSION['alert_message']['type'])) {
+        if (isset($_SESSION['alert_message']['message'])) {
+            $has_alert_message = true;
+            $alert_message = $_SESSION['alert_message']['message'];
+            $alert_type = $_SESSION['alert_message']['type'];
+            unset($_SESSION['alert_message']);
+        }
+    }
+}
+
+if (isset($PAGE_TITLE) && strlen($PAGE_TITLE) > 2) {
+    $page_is_set = true;
+}
+
+if (isset($PAGE_SECTION) && strlen($PAGE_SECTION) > 2) {
+    $section_is_set = true;
+}
+
+?>
 <!DOCTYPE html>
 <html lang="en" class="light-style layout-navbar-fixed layout-menu-fixed layout-compact " dir="ltr" data-theme="theme-default" data-assets-path="assets/" data-template="vertical-menu-template">
 
@@ -613,3 +643,17 @@
                     <!-- Content -->
 
                     <div class="container-xxl flex-grow-1 container-p-y">
+
+                        <?php if ($section_is_set && $page_is_set) { ?>
+                            <h4 class="py-3 breadcrumb-wrapper mb-4">
+                                <span class="text-muted fw-light"><?= $PAGE_SECTION ?> /</span> <?= $PAGE_TITLE ?>
+                            </h4>
+                        <?php  } ?>
+
+                        <!-- bootstap dismissable alert -->
+                        <?php if ($has_alert_message) { ?>
+                            <div class="alert alert-<?= $alert_type ?> alert-dismissible fade show" role="alert">
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                <?= $alert_message ?>
+                            </div>
+                        <?php } ?>
