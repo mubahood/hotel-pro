@@ -4,16 +4,7 @@ require_once('functions.php');
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
-    echo '<pre>';
 
-    if (isset($_FILES) && isset($_FILES['photo'])) {
-        $resp = upload_image($_FILES['photo']);
-        echo '<hr>';
-        print_r($resp);
-    }
-
-    echo '</pre>';
-    exit;
 
     //check if name is submited
     if (!isset($_POST['name']) || empty($_POST['name'])) {
@@ -29,9 +20,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
+
+    $image = null;
+    if (isset($_FILES) && isset($_FILES['photo'])) {
+        $resp = upload_image($_FILES['photo']);
+        if (is_array($resp) && isset($resp['status']) && $resp['status'] === true) {
+            $image = $resp['message'];
+        }
+    }
+
     db_insert('room_categories', [
         'name' => $_POST['name'],
         'template' => $_POST['template'],
+        'photo' => $image,
         'details' => $_POST['details'],
     ]);
     alert_message('success', 'Room Category created successfully.');
