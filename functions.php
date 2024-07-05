@@ -90,6 +90,48 @@ function alert_message($type, $data)
 }
 
 
+
+function db_find($table, $id)
+{
+    $data = db_select($table, " id = $id ");
+    if (count($data) > 0) {
+        return $data[0];
+    }
+    return null;
+}
+
+//db_delete
+function db_delete($table, $id)
+{
+    $conn = db_connect();
+    $sql = "DELETE FROM $table WHERE id = $id";
+    $result = mysqli_query($conn, $sql);
+    if ($result) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
+function db_update($table, $id, $data)
+{
+    $conn = db_connect();
+    $fields = '';
+    foreach ($data as $key => $value) {
+        $value = mysqli_real_escape_string($conn, $value);
+        $fields .= "$key = '$value',";
+    }
+    $fields = rtrim($fields, ',');
+    $sql = "UPDATE $table SET $fields WHERE id = $id";
+    $result = mysqli_query($conn, $sql);
+    if ($result) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 function db_select($table, $where = null, $fields = '*')
 {
     $conn = db_connect();

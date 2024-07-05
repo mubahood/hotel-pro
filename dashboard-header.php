@@ -27,6 +27,11 @@ if (isset($PAGE_SECTION) && strlen($PAGE_SECTION) > 2) {
     $section_is_set = true;
 }
 
+$section_link = '#';
+if (isset($SECTION_LINK) && strlen($SECTION_LINK) > 2) {
+    $section_link = $SECTION_LINK;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en" class="light-style layout-navbar-fixed layout-menu-fixed layout-compact " dir="ltr" data-theme="theme-default" data-assets-path="assets/" data-template="vertical-menu-template">
@@ -646,7 +651,10 @@ if (isset($PAGE_SECTION) && strlen($PAGE_SECTION) > 2) {
 
                         <?php if ($section_is_set && $page_is_set) { ?>
                             <h4 class="py-3 breadcrumb-wrapper mb-4">
-                                <span class="text-muted fw-light"><?= $PAGE_SECTION ?> /</span> <?= $PAGE_TITLE ?>
+                                <span class="text-muted fw-light">
+                                    <a href="<?= $section_link ?>"><?= $PAGE_SECTION ?></a>
+
+                                    /</span> <?= $PAGE_TITLE ?>
                             </h4>
                         <?php  } ?>
 
