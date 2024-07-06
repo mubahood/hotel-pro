@@ -2,7 +2,40 @@
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
+/* 
 
+
+price
+
+status
+main_photo
+gallery_photos
+
+
+details
+
+rating
+template
+pets_allowed
+
+check_in
+check_out
+
+special_instructions
+children
+
+
+amenities_max_people
+amenities_wifi
+amenities_parking
+amenities_breakfast
+
+amenities_towels
+amenities_swimming_pool
+amenities_gym
+amenities_ac
+
+*/
 
 //image uploading function
 function upload_image($file)

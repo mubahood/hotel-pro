@@ -161,6 +161,12 @@ if (isset($SECTION_LINK) && strlen($SECTION_LINK) > 2) {
                     <li class="menu-header small text-uppercase"><span class="menu-header-text" data-i18n="Room Management">Room Management</span></li>
 
                     <li class="menu-item">
+                        <a href="admin-rooms.php" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-copy"></i>
+                            <div>Rooms</div>
+                        </a>
+                    </li>
+                    <li class="menu-item">
                         <a href="admin-room-categories.php" class="menu-link">
                             <i class="menu-icon tf-icons bx bx-copy"></i>
                             <div>Room Categories</div>
