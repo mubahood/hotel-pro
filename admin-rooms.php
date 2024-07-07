@@ -32,7 +32,7 @@ $PAGE_SECTION = 'Rooms';
 $PAGE_TITLE = 'Rooms List';
 require_once('dashboard-header.php');
 
-$room_categories = db_select('room_categories');
+$rooms = db_select('rooms');
 
 ?>
 <!-- css assets/vendor/libs/datatables-bs5/datatables-bootstrap5.css -->
@@ -48,25 +48,25 @@ $room_categories = db_select('room_categories');
                 <table class="table table-striped table-bordered table-hover" id="category_tables">
                     <thead>
                         <tr>
-                            <th>Category Name</th>
-                            <th>Room Template</th>
-                            <th>Category Photo</th>
-                            <th>Category Details</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Category</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($room_categories as $category) : ?>
+                        <?php foreach ($rooms as $room) : ?>
                             <tr>
-                                <td><?= $category['name'] ?></td>
-                                <td><?= $category['template'] ?></td>
+                                <td><?= $room['name'] ?></td>
+                                <td><?= $room['price'] ?></td>
+                                <td><?= $room['status'] ?></td>
                                 <td>
-                                    <img src="uploads/<?= $category['photo'] ?>" alt="<?= $category['name'] ?>" class="img-thumbnail" style="width: 100px;">
+                                    <img src="uploads/<?= $room['main_photo'] ?>" alt="<?= $room['name'] ?>" class="img-thumbnail" style="width: 100px;">
                                 </td>
-                                <td><?= $category['details'] ?></td>
                                 <td>
-                                    <a href="admin-room-categories-create.php?id=<?= $category['id'] ?>" class="btn btn-sm btn-warning">Edit</a>
-                                    <a href="admin-room-categories.php?delete=<?= $category['id'] ?>" class="btn btn-sm btn-danger">Delete</a>
+                                    <a href="admin-room-categories-create.php?id=<?= $room['id'] ?>" class="btn btn-sm btn-warning">Edit</a>
+                                    <a href="admin-room-categories.php?delete=<?= $room['id'] ?>" class="btn btn-sm btn-danger">Delete</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
