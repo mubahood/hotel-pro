@@ -2,11 +2,18 @@
 
 require_once('functions.php');
 
+/* echo '<pre>';
+print_r($_SESSION);
+echo '</pre>';
+die(); */
+
+
 $section_is_set = false;
 $page_is_set = false;
 $has_alert_message = false;
 $alert_message = '';
 $alert_type = '';
+$user_type = $_SESSION['user']['user_type'];
 
 if (isset($_SESSION['alert_message'])) {
     if (isset($_SESSION['alert_message']['type'])) {
@@ -86,7 +93,7 @@ if (isset($SECTION_LINK) && strlen($SECTION_LINK) > 2) {
 
 
                 <div class="app-brand demo ">
-                    <a href="/" class="app-brand-link">
+                    <a href="<?= url() ?>" class="app-brand-link">
                         <span class="app-brand-logo demo">
                             <svg width="26px" height="26px" viewBox="0 0 26 26" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="external.html?link=http://www.w3.org/1999/xlink">
                                 <title>icon</title>
@@ -135,7 +142,7 @@ if (isset($SECTION_LINK) && strlen($SECTION_LINK) > 2) {
 
                 <ul class="menu-inner py-1">
                     <!-- Dashboards -->
-                    <li class="menu-item active open">
+                    <!--  <li class="menu-item active open">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-home-circle"></i>
                             <div data-i18n="Dashboards">Dashboards</div>
@@ -148,30 +155,52 @@ if (isset($SECTION_LINK) && strlen($SECTION_LINK) > 2) {
                                 </a>
                             </li>
                         </ul>
-                    </li>
+                    </li> -->
 
-                    <li class="menu-item">
-                        <a href="app-calendar.html" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-calendar"></i>
-                            <div data-i18n="Calendar">Calendar</div>
-                        </a>
-                    </li>
+
+                    <!-- check if is customer user_type -->
+                    <?php if ($user_type == 'Customer') { ?>
+                        <li class="menu-item <?= get_active_menu_class('customer-bookings.php'); ?>">
+                            <a href="customer-bookings.php" class="menu-link">
+                                <i class="menu-icon tf-icons bx bx-calendar"></i>
+                                <div>Customer bookings</div>
+                            </a>
+                        </li>
+                    <?php } ?>
 
                     <!-- Apps & Pages -->
-                    <li class="menu-header small text-uppercase"><span class="menu-header-text" data-i18n="Room Management">Room Management</span></li>
 
-                    <li class="menu-item">
-                        <a href="admin-rooms.php" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-copy"></i>
-                            <div>Rooms</div>
-                        </a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="admin-room-categories.php" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-copy"></i>
-                            <div>Room Categories</div>
-                        </a>
-                    </li>
+                    <?php if ($user_type == 'Admin') { ?>
+                        <li class="menu-header small text-uppercase"><span class="menu-header-text" data-i18n="Room Management">Room Management</span></li>
+                        <li class="menu-item <?= get_active_menu_class('admin-bookings.php'); ?>">
+                            <a href="admin-bookings.php" class="menu-link">
+                                <i class="menu-icon tf-icons bx bx-copy"></i>
+                                <div>Admin Bookings</div>
+                            </a>
+                        </li>
+                        <li class="menu-item <?= get_active_menu_class('admin-rooms.php'); ?>">
+                            <a href="admin-rooms.php" class="menu-link">
+                                <i class="menu-icon tf-icons bx bx-copy"></i>
+                                <div>Rooms</div>
+                            </a>
+                        </li>
+                        <li class="menu-item <?= get_active_menu_class('admin-posts.php'); ?>">
+                            <a href="admin-posts.php" class="menu-link">
+                                <i class="menu-icon tf-icons bx bx-copy"></i>
+                                <div>Admin posts</div>
+                            </a>
+                        </li>
+                    <?php } ?>
+
+                    <!-- if not admin $user_type -->
+                    <?php if ($user_type == 'Admin') { ?>
+                        <li class="menu-item <?= get_active_menu_class('admin-room-categories.php'); ?>">
+                            <a href="admin-room-categories.php" class="menu-link">
+                                <i class="menu-icon tf-icons bx bx-copy"></i>
+                                <div>Room Categories</div>
+                            </a>
+                        </li>
+                    <?php } ?>
 
 
 
@@ -618,7 +647,7 @@ if (isset($SECTION_LINK) && strlen($SECTION_LINK) > 2) {
                                             <div class="dropdown-divider"></div>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item" href="auth-login-cover.html" target="_blank">
+                                            <a class="dropdown-item" href="logout.php">
                                                 <i class="bx bx-power-off me-2"></i>
                                                 <span class="align-middle">Log Out</span>
                                             </a>

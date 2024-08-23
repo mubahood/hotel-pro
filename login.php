@@ -1,6 +1,15 @@
 <?php
 require_once('functions.php');
 
+if (isset($_SERVER['HTTP_REFERER'])) {
+    //check if does not contain register.php
+    if (strpos($_SERVER['HTTP_REFERER'], 'register.php') === false) {
+        if (strpos($_SERVER['HTTP_REFERER'], 'login.php') === false) {
+            $_SESSION['pending_redirect'] = $_SERVER['HTTP_REFERER'];
+        }
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $_SESSION['form_data'] = $_POST;
 
@@ -16,8 +25,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $users = db_select('users', " email = '$email' ");
     if (count($users) == 0) {
         $_SESSION['form_errors']['username'] = 'User does not exist.';
+
+        if (isset($_SESSION['pending_redirect'])) {
+            if ($_SESSION['pending_redirect'] != null) {
+                unset($_SESSION['pending_redirect']);
+                header('Location: ' . $_SESSION['pending_redirect']);
+                exit;
+            }
+        }
         //redirect back
         header('Location: login.php');
+
         exit;
     }
     $user = $users[0];
@@ -26,6 +44,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!password_verify($password, $password_hash)) {
         $_SESSION['form_errors']['password'] = 'Invalid password.';
         //redirect back
+        $_SESSION['user'] = $user;
+        if (isset($_SESSION['pending_redirect'])) {
+            if ($_SESSION['pending_redirect'] != null) {
+                header('Location: ' . $_SESSION['pending_redirect']);
+                unset($_SESSION['pending_redirect']);
+                exit;
+            }
+        }
         header('Location: login.php');
         exit;
     }

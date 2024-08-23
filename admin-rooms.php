@@ -3,13 +3,33 @@
 require_once('functions.php');
 
 //check if delete is set
+if (isset($_GET['duplicate'])) {
+    $id = $_GET['duplicate'];
+
+    $original = db_find('rooms', $id);
+    if ($original == null) {
+        alert_message('danger', 'Room not found.');
+        header('Location: admin-rooms.php');
+        exit;
+    }
+    $duplicate = $original;
+    unset($duplicate['id']);
+    $duplicate['name'] = $original['name'] . ' (Copy)';
+
+    //insert
+    db_insert('rooms', $duplicate);
+
+    alert_message('success', 'Room duplicated successfully.');
+    header('Location: admin-rooms.php');
+    exit;
+}
 if (isset($_GET['delete'])) {
     $id = $_GET['delete'];
 
-    $category = db_find('room_categories', $id);
+    $category = db_find('rooms', $id);
     if ($category == null) {
-        alert_message('danger', 'Room Category not found.');
-        header('Location: admin-room-categories.php');
+        alert_message('danger', 'Room not found.');
+        header('Location: admin-rooms.php');
         exit;
     }
 
@@ -22,9 +42,9 @@ if (isset($_GET['delete'])) {
         }
     }
 
-    db_delete('room_categories', $id);
-    alert_message('success', 'Room Category deleted successfully.');
-    header('Location: admin-room-categories.php');
+    db_delete('rooms', $id);
+    alert_message('success', 'Room deleted successfully.');
+    header('Location: admin-rooms.php');
     exit;
 }
 
@@ -65,8 +85,9 @@ $rooms = db_select('rooms');
                                     <img src="uploads/<?= $room['main_photo'] ?>" alt="<?= $room['name'] ?>" class="img-thumbnail" style="width: 100px;">
                                 </td>
                                 <td>
-                                    <a href="admin-room-categories-create.php?id=<?= $room['id'] ?>" class="btn btn-sm btn-warning">Edit</a>
-                                    <a href="admin-room-categories.php?delete=<?= $room['id'] ?>" class="btn btn-sm btn-danger">Delete</a>
+                                    <a href="admin-rooms.php?duplicate=<?= $room['id'] ?>" class="btn btn-sm btn-info">Duplicate</a>
+                                    <a href="admin-room-create.php?id=<?= $room['id'] ?>" class="btn btn-sm btn-warning">Edit</a>
+                                    <a href="admin-rooms.php?delete=<?= $room['id'] ?>" class="btn btn-sm btn-danger">Delete</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

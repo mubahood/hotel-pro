@@ -2,19 +2,65 @@
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
-/* 
+
+$CURRENCY = 'UGX';
+
+function is_logged_in()
+{
+    $loggedIn = false;
+    if (isset($_SESSION['user'])) {
+        if (isset($_SESSION['user']['id'])) { {
+                if ($_SESSION['user']['id'] > 0) {
+                    $loggedIn = true;
+                }
+            }
+        }
+    }
+    return $loggedIn;
+}
+
+function get_active_menu_class($path)
+{
+
+    $path2 = $_SERVER['REQUEST_URI'];
+
+    $splits = explode('/', $path2);
+    //check if splits is empty
+    if (empty($splits)) {
+        return '';
+    }
+    $last_seg = end($splits);
+
+    if ($last_seg == $path) {
+        return 'active';
+    }
+    return '';
+}
+function url($path = null)
+{
+    $BASE_URL = 'http://localhost:8888/hotel-pro';
 
 
+    if ($path == null || $path == '') {
+        return $BASE_URL;
+    }
 
 
+    //check if path starts with /
+    if (substr($path, 0, 1) == '/') {
+        return $BASE_URL . $path;
+    }
+    return $BASE_URL . '/' . $path;
+}
 
 
-amenities_towels
-amenities_swimming_pool
-amenities_gym
-amenities_ac
-
-*/
+function short($text, $limit = 100)
+{
+    if (strlen($text) > $limit) {
+        return substr($text, 0, $limit) . '...';
+    }
+    return $text;
+}
 
 //image uploading function
 function upload_image($file)

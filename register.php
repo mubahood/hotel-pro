@@ -1,8 +1,37 @@
 <?php
+
+
 require_once('functions.php');
-/* echo "<pre>";
+
+$page_is_set = false;
+$has_alert_message = false;
+$alert_message = '';
+$alert_type = '';
+
+if (isset($_SESSION['alert_message'])) {
+    if (isset($_SESSION['alert_message']['type'])) {
+        if (isset($_SESSION['alert_message']['message'])) {
+            $has_alert_message = true;
+            $alert_message = $_SESSION['alert_message']['message'];
+            $alert_type = $_SESSION['alert_message']['type'];
+            unset($_SESSION['alert_message']);
+        }
+    }
+}
+
+/* echo '<pre>';
 print_r($_SESSION);
-die(); */
+die();
+ */
+if (isset($_SERVER['HTTP_REFERER'])) {
+    //check if does not contain register.php
+    if (strpos($_SERVER['HTTP_REFERER'], 'register.php') === false) {
+        if (strpos($_SERVER['HTTP_REFERER'], 'login.php') === false) {
+            $_SESSION['pending_redirect'] = $_SERVER['HTTP_REFERER'];
+        }
+    }
+}
+
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $_SESSION['form_data'] = $_POST;
@@ -54,6 +83,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     $user = $data[0];
     $_SESSION['user'] = $user;
+
+    if (isset($_SESSION['pending_redirect'])) {
+        if ($_SESSION['pending_redirect'] != null) {
+            $url = $_SESSION['pending_redirect'];
+            unset($_SESSION['pending_redirect']);
+            header('Location: ' . $url);
+            exit;
+        }
+    }
 
     //check if user type is customer
     if ($user['user_type'] == 'Customer') {
@@ -189,6 +227,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <!-- /Logo -->
                     <h4 class="mb-2">Welcome to Frest! 👋</h4>
                     <p class="mb-4">Please sign-in to your account and start the adventure</p>
+
+                    <?php if ($has_alert_message) { ?>
+                        <div class="alert alert-<?= $alert_type ?> alert-dismissible fade show" role="alert">
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <?= $alert_message ?>
+                        </div>
+                    <?php } ?>
 
                     <form id="formAuthentication" class="mb-3" action="register.php" method="POST">
 

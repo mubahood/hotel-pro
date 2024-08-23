@@ -7,6 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     //check if name is submited
     if (!isset($_POST['name']) || empty($_POST['name'])) {
         $_SESSION['form_errors']['name'] = 'Name is required';
+        die('Name is required');
         header('Location: admin-room-categories-create.php');
         exit;
     }
@@ -27,33 +28,104 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 
+    $uploaded_gallery_photos = [];
+    if (isset($_FILES) && isset($_FILES['gallery_photos'])) {
+        //check if $_FILES['gallery_photos'] is array and not empty
+        if (is_array($_FILES['gallery_photos']) && !empty($_FILES['gallery_photos'])) {
+            $max_count = count($_FILES['gallery_photos']['name']);
+
+            for ($i = 0; $i < $max_count; $i++) {
+                $photo['name'] = $_FILES['gallery_photos']['name'][$i];
+                $photo['type'] = $_FILES['gallery_photos']['type'][$i];
+                $photo['tmp_name'] = $_FILES['gallery_photos']['tmp_name'][$i];
+                $photo['error'] = $_FILES['gallery_photos']['error'][$i];
+                $photo['size'] = $_FILES['gallery_photos']['size'][$i];
+                $resp = upload_image($photo);
+                if (is_array($resp) && isset($resp['status']) && $resp['status'] === true) {
+                    $uploaded_gallery_photos[] = $resp['message'];
+                }
+            }
+        }
+    }
+
+
 
     //check if is editing
     if (isset($_POST['edit_id'])) {
         $id = $_POST['edit_id'];
+        $room = db_find('rooms', $id);
+        if ($room == null) {
+            alert_message('danger', 'Room not found.');
+            header('Location: admin-rooms.php');
+            exit;
+        }
         $data = [
-            'name' => $_POST['name'],
+            'amenities_parking' => $_POST['amenities_parking'],
+            'pets_allowed' => $_POST['pets_allowed'],
+            'check_in' => $_POST['check_in'],
+            'children' => $_POST['children'],
+            'gallery_photos' => $gallery_photos,
+            'check_out' => $_POST['check_out'],
+            'special_instructions' => $_POST['special_instructions'],
             'template' => $_POST['template'],
+            'rating' => $_POST['rating'],
+            'amenities_max_people' => $_POST['amenities_max_people'],
+            'amenities_wifi' => $_POST['amenities_wifi'],
+            'amenities_breakfast' => $_POST['amenities_breakfast'],
+            'amenities_gym' => $_POST['amenities_gym'],
+            'amenities_towels' => $_POST['amenities_towels'],
+            'amenities_swimming_pool' => $_POST['amenities_swimming_pool'],
+            'amenities_ac' => $_POST['amenities_ac'],
             'details' => $_POST['details'],
+            'name' => $_POST['name'],
+            'room_category_id' => $_POST['room_category_id'],
+            'price' => $_POST['price'],
+            'status' => $_POST['status'],
+            'show_at_home' => $_POST['show_at_home'],
         ];
+
+        $database_gallery_photos = [];
+        if ($room['gallery_photos'] != null && strlen($room['gallery_photos']) > 4) {
+            $database_gallery_photos = json_decode($room['gallery_photos']);
+        }
+
+        if (!is_array($database_gallery_photos)) {
+            $database_gallery_photos = [];
+        }
+        if ($uploaded_gallery_photos != null && !empty($uploaded_gallery_photos)) {
+            foreach ($uploaded_gallery_photos as $photo) {
+                $database_gallery_photos[] = $photo;
+            }
+            $data['gallery_photos'] = json_encode($database_gallery_photos);
+        }
 
         //check if image is uploaded
         if ($main_photo != null && !empty($main_photo)) {
             $data['main_photo'] = $main_photo;
         }
 
-        db_update('room_categories', $id, $data);
+        db_update('rooms', $id, $data);
 
-        alert_message('success', 'Room Category updated successfully.');
-        header('Location: admin-room-categories.php');
+        //clear $_SESSION['form_errors']
+        unset($_SESSION['form_errors']);
+
+        alert_message('success', 'Room updated successfully.');
+        header('Location: admin-rooms.php');
         exit;
     } else {
+
+        //$uploaded_gallery_photos
+        $gallery_photos = '[]';
+        if ($uploaded_gallery_photos != null && !empty($uploaded_gallery_photos)) {
+            $gallery_photos = json_encode($uploaded_gallery_photos);
+        }
 
         db_insert('rooms', [
             'amenities_parking' => $_POST['amenities_parking'],
             'pets_allowed' => $_POST['pets_allowed'],
             'check_in' => $_POST['check_in'],
             'children' => $_POST['children'],
+            'gallery_photos' => $gallery_photos,
             'check_out' => $_POST['check_out'],
             'special_instructions' => $_POST['special_instructions'],
             'template' => $_POST['template'],
@@ -71,7 +143,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             'main_photo' => $main_photo,
             'price' => $_POST['price'],
             'status' => $_POST['status'],
+            'show_at_home' => $_POST['show_at_home'],
         ]);
+        unset($_SESSION['form_errors']);
+
         alert_message('success', 'Room created successfully.');
         header('Location: admin-rooms.php');
     }
@@ -86,11 +161,15 @@ $SECTION_LINK = 'admin-rooms.php';
 $isEditing = false;
 $id = null;
 $room = null;
+$existing_gallery_photos = [];
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
     $room = db_find('rooms', $id);
     if ($room != null) {
-        $room = true;
+        $isEditing = true;
+        if ($room['gallery_photos'] != null && strlen($room['gallery_photos']) > 4) {
+            $existing_gallery_photos = json_decode($room['gallery_photos']);
+        }
     }
 }
 
@@ -157,7 +236,7 @@ foreach ($room_cats as $cat) {
 
                     <div class="row">
 
-                        <div class="col-md-4 mt-1 mt-md-2">
+                        <div class="col-md-3 mt-1 mt-md-2">
                             <?php echo select_input([
                                 'label' => 'Room Status',
                                 'name' => 'status',
@@ -171,27 +250,55 @@ foreach ($room_cats as $cat) {
                                 ]
                             ]) ?>
                         </div>
+                        <div class="col-md-3 mt-1 mt-md-2">
+                            <?php echo select_input([
+                                'label' => 'Show at Home Page',
+                                'name' => 'show_at_home',
+                                'attributes' => ' required ',
+                                'value' => $isEditing ? $room['show_at_home'] : '',
+                                'options' => [
+                                    'Yes' => 'Yes',
+                                    'No' => 'No',
+                                ]
+                            ]) ?>
+                        </div>
 
-                        <div class="col-md-4 mt-1 mt-md-2">
+                        <div class="col-md-3 mt-1 mt-md-2">
                             <?php echo text_input([
                                 'label' => 'Main photo',
                                 'name' => 'main_photo',
                                 'type' => 'file',
-                                'attributes' => ' required accept="image/*" ',
+                                'attributes' => ' accept="image/*" ',
                                 'value' => $isEditing ? $room['main_photo'] : ''
                             ]) ?>
+                            <!-- display main photo if is editing and not empty -->
+                            <?php if ($isEditing && $room['main_photo'] != null && strlen($room['main_photo']) > 2) { ?>
+                                <img src="uploads/<?= $room['main_photo'] ?>" alt="<?= $room['name'] ?>" class="img-thumbnail rounded" style="width: 70px;">
+                            <?php } ?>
                         </div>
 
                         <!-- gallery_photos -->
-                        <div class="col-md-4 mt-1 mt-md-2">
+                        <div class="col-md-3 mt-1 mt-md-2">
                             <?php echo text_input([
                                 'label' => 'Gallery Photos',
-                                'name' => 'gallery_photos',
+                                'name' => 'gallery_photos[]',
                                 'type' => 'file',
                                 'attributes' => ' multiple accept="image/*" ',
                                 'value' => $isEditing ? $room['gallery_photos'] : ''
                             ]) ?>
                         </div>
+                        <!-- if is editing and $existing_gallery_photos is not empty -->
+                        <?php if ($isEditing && $existing_gallery_photos != null && !empty($existing_gallery_photos)) { ?>
+                            <div class="row">
+                                <?php foreach ($existing_gallery_photos as $photo) { ?>
+                                    <div class="col-1">
+                                        <img src="uploads/<?= $photo ?>" alt="<?= $room['name'] ?>" class="img-thumbnail rounded" style="width: 70px;">
+                                        <!-- delete  button -->
+                                        <a target="_blank" href="admin-delete-photo.php?id=<?= $room['id'] ?>&photo=<?= $photo ?>&type=room" class="btn btn-sm btn-danger">X</a>
+                                    </div>
+                                <?php } ?>
+                            </div>
+                        <?php } ?>
                     </div>
                     <div class="row">
                         <!-- details -->
